@@ -26,7 +26,7 @@ public class HosterController {
 
         System.out.println("Processing Request: " + request.getRequestURL());
         
-        String directory = "sites";
+        Path baseDir = Paths.get("sites");
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Basic ")) {
@@ -37,8 +37,8 @@ public class HosterController {
                 // credentials = username:password
                 final String[] values = credentials.split(":", 2);
                 if (values.length > 0 && !values[0].isEmpty()) {
-                    directory = values[0];
-                    System.out.println("User detected in Auth header: " + directory);
+                    baseDir = baseDir.resolve(values[0]);
+                    System.out.println("User detected in Auth header: " + values[0]);
                 }
             } catch (Exception e) {
                 System.out.println("Error parsing auth header: " + e.getMessage());
@@ -50,12 +50,12 @@ public class HosterController {
                     .build();
         }
 
-        System.out.println("Serving from directory: " + directory);
+        System.out.println("Serving from directory: " + baseDir);
 
         try {
-            Path filePath = Paths.get(directory).resolve(path).normalize();
+            Path filePath = baseDir.resolve(path).normalize();
             
-            if (!filePath.startsWith(directory)) {
+            if (!filePath.startsWith(baseDir)) {
                  return ResponseEntity.badRequest().build();
             }
 
